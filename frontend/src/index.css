@@ -1,0 +1,153 @@
+@import 'tailwindcss';
+
+/*
+ * Theme system — owned by Team 2 (TripleX).
+ *
+ * Dark mode is class-based rather than purely media-query based, so the
+ * day/night toggle can override the operating system preference. The inline
+ * script in index.html applies the stored choice before first paint.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:
+    ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+
+  --color-brand-50: oklch(0.969 0.016 293.756);
+  --color-brand-100: oklch(0.943 0.029 294.588);
+  --color-brand-200: oklch(0.894 0.057 293.283);
+  --color-brand-300: oklch(0.811 0.111 293.571);
+  --color-brand-400: oklch(0.702 0.183 293.541);
+  --color-brand-500: oklch(0.606 0.25 292.717);
+  --color-brand-600: oklch(0.541 0.281 293.009);
+  --color-brand-700: oklch(0.491 0.27 292.581);
+  --color-brand-800: oklch(0.432 0.232 292.759);
+  --color-brand-900: oklch(0.38 0.189 293.745);
+  --color-brand-950: oklch(0.283 0.141 291.089);
+
+  --color-ok-500: oklch(0.723 0.192 149.579);
+  --color-ok-600: oklch(0.627 0.194 149.214);
+  --color-warn-500: oklch(0.769 0.188 70.08);
+  --color-warn-600: oklch(0.681 0.162 75.834);
+  --color-danger-500: oklch(0.637 0.237 25.331);
+  --color-danger-600: oklch(0.577 0.245 27.325);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
+  }
+
+  /* Tabular figures keep the normalization tables aligned. */
+  table {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+}
+
+/*
+ * The design system lives in `@utility` blocks rather than `@layer components`
+ * so that one class can compose another with `@apply` — Tailwind v4 only lets
+ * `@apply` reference real utilities.
+ */
+
+/* ---- Surfaces ---- */
+
+@utility card {
+  @apply rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900;
+}
+
+@utility card-padded {
+  @apply card p-5 sm:p-6;
+}
+
+/* ---- Buttons ---- */
+
+@utility btn {
+  @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@utility btn-primary {
+  @apply btn bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800;
+}
+
+@utility btn-secondary {
+  @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 active:bg-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:active:bg-slate-700;
+}
+
+@utility btn-ghost {
+  @apply btn text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100;
+}
+
+/* ---- Forms ---- */
+
+@utility label {
+  @apply mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300;
+}
+
+@utility input {
+  @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-600;
+}
+
+/* ---- Chips and badges ---- */
+
+@utility chip {
+  @apply inline-flex items-center gap-1 rounded-md px-2 py-1 font-mono text-xs font-medium;
+}
+
+@utility chip-neutral {
+  @apply chip bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300;
+}
+
+@utility chip-brand {
+  @apply chip bg-brand-100 text-brand-800 dark:bg-brand-900/50 dark:text-brand-200;
+}
+
+@utility badge {
+  @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold;
+}
+
+@utility badge-pass {
+  @apply badge bg-ok-500/15 text-ok-600 dark:text-ok-500;
+}
+
+@utility badge-fail {
+  @apply badge bg-danger-500/15 text-danger-600 dark:text-danger-500;
+}
+
+@utility badge-info {
+  @apply badge bg-brand-500/15 text-brand-700 dark:text-brand-300;
+}
+
+/* ---- Typography helpers ---- */
+
+@utility page-title {
+  @apply text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-white;
+}
+
+@utility page-subtitle {
+  @apply mt-2 max-w-2xl text-slate-600 dark:text-slate-400;
+}
+
+@utility section-title {
+  @apply text-lg font-semibold text-slate-900 dark:text-white;
+}
+
+/* ---- Notices ---- */
+
+@utility notice-warn {
+  @apply rounded-lg border border-warn-500/40 bg-warn-500/10 px-4 py-3 text-sm text-slate-800 dark:text-slate-200;
+}
+
+@utility notice-error {
+  @apply rounded-lg border border-danger-500/40 bg-danger-500/10 px-4 py-3 text-sm text-slate-800 dark:text-slate-200;
+}
