@@ -96,6 +96,10 @@ export interface NormalizationAnalysis {
   decomposition: DecomposedRelation[];
   /** The BCNF analysis algorithm output. */
   bcnfDecomposition: DecomposedRelation[];
+  decompositionProperties?: {
+  lossless: boolean;
+  dependencyPreserving: boolean;
+};
   /** The 4NF/5NF analysis output. */
   higherNormalForms: HigherNormalFormResult;
 

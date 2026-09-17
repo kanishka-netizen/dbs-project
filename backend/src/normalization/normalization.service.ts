@@ -11,6 +11,7 @@ import { StepsEngine } from './engines/steps.engine.js';
 import { ValidationEngine } from './engines/validation.engine.js';
 import { HigherNormalFormEngine } from './engines/higher-nf.engine.js';
 import { HigherNormalFormResult } from './engines/higher-nf.types.js';
+import { DecompositionPropertiesEngine } from './engines/decomposition-properties.engine.js';
 
 @Injectable()
 export class NormalizationService {
@@ -89,7 +90,32 @@ export class NormalizationService {
       normalFormAnalysis.violations,
       higherNormalForms,
     );
+    const finalDecomposition =
+  higherNormalForms.decomposition.length > 0
+    ? higherNormalForms.decomposition
+    : bcnfDecomposition.length > 0
+      ? bcnfDecomposition
+      : decomposition.length > 0
+        ? decomposition
+        : [{ attributes: data.attributes }];
 
+const decompositionAttributes = finalDecomposition.map(
+  (relation) => relation.attributes,
+);
+
+const decompositionProperties =
+  DecompositionPropertiesEngine.isLossless(
+    decompositionAttributes,
+    data.attributes,
+    data.functionalDependencies,
+    multivaluedDependencies,
+  );
+
+const dependencyPreserving =
+  DecompositionPropertiesEngine.isDependencyPreserving(
+    decompositionAttributes,
+    data.functionalDependencies,
+  );
     // Step 7: Return the complete analysis
     return {
       relation: data.relationName,
@@ -99,10 +125,14 @@ export class NormalizationService {
 
       functionalDependencies: data.functionalDependencies,
 
+      
       multivaluedDependencies,
 
       candidateKeys,
-
+      decompositionProperties: {
+  lossless: decompositionProperties,
+  dependencyPreserving,
+},
       normalForms: normalFormAnalysis.normalForms,
 
       highestNormalForm: this.resolveHighestNormalForm(

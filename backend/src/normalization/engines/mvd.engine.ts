@@ -1,4 +1,4 @@
-import { FunctionalDependency } from './candidate-key.engine.js';
+import type { FunctionalDependency } from './candidate-key.engine.js';
 
 export interface MultivaluedDependency {
   left: string[];
