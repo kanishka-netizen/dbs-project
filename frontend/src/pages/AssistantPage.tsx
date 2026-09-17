@@ -29,10 +29,18 @@ export function AssistantPage() {
           </p>
         )}
 
-        
+        {analysis?.valid && (
+          <AssistantPanel
+            analysis={analysis}
+            onEdit={() => {
+              document.getElementById('schema-input')?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+              });
+            }}
+          />
+        )}
 
-        {analysis?.valid && <AssistantPanel analysis={analysis} />}
-        
         <PromptLog />
       </div>
     </PageContainer>

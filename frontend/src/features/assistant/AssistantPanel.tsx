@@ -22,36 +22,37 @@ const SOURCE_LABEL: Record<string, string> = {
  */
 export function AssistantPanel({
   analysis,
+  onEdit,
 }: {
   analysis: NormalizationAnalysis;
+  onEdit: () => void;
 }) {
   const normalized = resolveNormalizedSchema(analysis);
 
   function exportJson() {
-  const generatedAt = new Date().toISOString();
-  const report = buildJsonReport(analysis, generatedAt);
+    const generatedAt = new Date().toISOString();
+    const report = buildJsonReport(analysis, generatedAt);
 
-  downloadFile(
-    `${analysis.relation}-normalization-report.json`,
-    report,
-    'application/json',
-  );
-}
+    downloadFile(
+      `${analysis.relation}-normalization-report.json`,
+      report,
+      'application/json',
+    );
+  }
 
-function exportMarkdown() {
-  const generatedAt = new Date().toISOString();
-  const report = buildMarkdownReport(analysis, generatedAt);
+  function exportMarkdown() {
+    const generatedAt = new Date().toISOString();
+    const report = buildMarkdownReport(analysis, generatedAt);
 
-  downloadFile(
-    `${analysis.relation}-normalization-report.md`,
-    report,
-    'text/markdown',
-  );
-}
+    downloadFile(
+      `${analysis.relation}-normalization-report.md`,
+      report,
+      'text/markdown',
+    );
+  }
 
   return (
     <section aria-labelledby="assistant-heading" className="card-padded">
-      {/* Header */}
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h2 id="assistant-heading" className="section-title">
@@ -63,8 +64,15 @@ function exportMarkdown() {
           </p>
         </div>
 
-        {/* Export buttons */}
         <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={onEdit}
+          >
+            Edit & Re-run
+          </button>
+
           <button
             type="button"
             className="btn-primary"
@@ -83,7 +91,6 @@ function exportMarkdown() {
         </div>
       </div>
 
-      {/* Normalization path */}
       {analysis.steps.length > 0 && (
         <section
           aria-labelledby="normalization-path-heading"
@@ -112,7 +119,6 @@ function exportMarkdown() {
 
                 <div className="relative rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-950">
                   <div className="flex gap-4">
-                    {/* Step number */}
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 font-bold text-white">
                       {step.step}
                     </div>
@@ -151,34 +157,35 @@ function exportMarkdown() {
       )}
 
       {analysis.decompositionProperties && (
-  <section className="card-padded">
-    <h2 className="section-title">Decomposition Properties</h2>
+        <section className="card-padded">
+          <h2 className="section-title">Decomposition Properties</h2>
 
-    <div className="mt-4 grid gap-3 sm:grid-cols-2">
-      <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-700">
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-          Lossless Join
-        </p>
-        <p className="mt-1 text-lg font-semibold">
-          {analysis.decompositionProperties.lossless ? 'Yes' : 'No'}
-        </p>
-      </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-700">
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                Lossless Join
+              </p>
 
-      <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-700">
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-          Dependency Preserving
-        </p>
-        <p className="mt-1 text-lg font-semibold">
-          {analysis.decompositionProperties.dependencyPreserving
-            ? 'Yes'
-            : 'No'}
-        </p>
-      </div>
-    </div>
-  </section>
-)}
+              <p className="mt-1 text-lg font-semibold">
+                {analysis.decompositionProperties.lossless ? 'Yes' : 'No'}
+              </p>
+            </div>
 
-      {/* Normalized relations */}
+            <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-700">
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                Dependency Preserving
+              </p>
+
+              <p className="mt-1 text-lg font-semibold">
+                {analysis.decompositionProperties.dependencyPreserving
+                  ? 'Yes'
+                  : 'No'}
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+
       <section aria-labelledby="normalized-relations-heading">
         <div className="mb-4">
           <h3
@@ -205,7 +212,6 @@ function exportMarkdown() {
         </div>
       </section>
 
-      {/* Export information */}
       <p className="mt-6 text-xs text-slate-500 dark:text-slate-400">
         Export the normalization analysis as JSON or Markdown for
         documentation and submission.

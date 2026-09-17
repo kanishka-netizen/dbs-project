@@ -31,79 +31,39 @@ export function SchemaInput({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const relationId = useId();
   const schemaId = useId();
+
   function applyImportedSchema(
-  attributes: string[],
-  functionalDependencies: AnalyzeNormalizationRequest['functionalDependencies'],
-  multivaluedDependencies: NonNullable<
-  AnalyzeNormalizationRequest['multivaluedDependencies']
->,
-) {
-  setSchemaText(
-    [
-      attributes.join(', '),
-      ...functionalDependencies.map(
-        (fd) => `${fd.left.join(', ')} -> ${fd.right.join(', ')}`,
-      ),
-      ...multivaluedDependencies.map(
-        (mvd) => `${mvd.left.join(', ')} ->> ${mvd.right.join(', ')}`,
-      ),
-    ].join('\n'),
-  );
-
-  setIssues([]);
-}
-
-function handleCreateTableImport() {
-  const sql = window.prompt(
-    'Paste your CREATE TABLE statement:',
-  );
-
-  if (!sql) {
-    return;
-  }
-
-  const result = parseCreateTable(sql);
-
-  if (result.issues.length > 0 || result.schema.attributes.length === 0) {
-    setIssues(
-      result.issues.map((issue) => ({
-        line: 1,
-        message: issue.message,
-      })),
+    attributes: string[],
+    functionalDependencies: AnalyzeNormalizationRequest['functionalDependencies'],
+    multivaluedDependencies: NonNullable<
+      AnalyzeNormalizationRequest['multivaluedDependencies']
+    >,
+  ) {
+    setSchemaText(
+      [
+        attributes.join(', '),
+        ...functionalDependencies.map(
+          (fd) => `${fd.left.join(', ')} -> ${fd.right.join(', ')}`,
+        ),
+        ...multivaluedDependencies.map(
+          (mvd) => `${mvd.left.join(', ')} ->> ${mvd.right.join(', ')}`,
+        ),
+      ].join('\n'),
     );
-    return;
+
+    setIssues([]);
   }
 
-  setRelationName('R');
+  function handleCreateTableImport() {
+    const sql = window.prompt('Paste your CREATE TABLE statement:');
 
-  applyImportedSchema(
-    result.schema.attributes,
-    result.schema.functionalDependencies,
-    result.schema.multivaluedDependencies,
-  );
-}
+    if (!sql) {
+      return;
+    }
 
-function handleCsvClick() {
-  fileInputRef.current?.click();
-}
-function handleCsvChange(
-  event: ChangeEvent<HTMLInputElement>,
-) {  const file = event.target.files?.[0];
+    const result = parseCreateTable(sql);
 
-  if (!file) {
-    return;
-  }
-
-  const reader = new FileReader();
-
-  reader.onload = () => {
-    const text = String(reader.result ?? '');
-    const result = parseCsv(text);
-
-    if (
-      result.issues.length > 0 ||
-      result.schema.attributes.length === 0
-    ) {
+    if (result.issues.length > 0 || result.schema.attributes.length === 0) {
       setIssues(
         result.issues.map((issue) => ({
           line: 1,
@@ -113,22 +73,59 @@ function handleCsvChange(
       return;
     }
 
-    setRelationName(
-      file.name.replace(/\.csv$/i, '') || 'R',
-    );
+    setRelationName('R');
 
     applyImportedSchema(
       result.schema.attributes,
       result.schema.functionalDependencies,
       result.schema.multivaluedDependencies,
     );
-  };
+  }
 
-  reader.readAsText(file);
+  function handleCsvClick() {
+    fileInputRef.current?.click();
+  }
 
-  // Allow selecting the same file again later.
-  event.target.value = '';
-}
+  function handleCsvChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const text = String(reader.result ?? '');
+      const result = parseCsv(text);
+
+      if (
+        result.issues.length > 0 ||
+        result.schema.attributes.length === 0
+      ) {
+        setIssues(
+          result.issues.map((issue) => ({
+            line: 1,
+            message: issue.message,
+          })),
+        );
+        return;
+      }
+
+      setRelationName(file.name.replace(/\.csv$/i, '') || 'R');
+
+      applyImportedSchema(
+        result.schema.attributes,
+        result.schema.functionalDependencies,
+        result.schema.multivaluedDependencies,
+      );
+    };
+
+    reader.readAsText(file);
+
+    // Allow selecting the same file again later.
+    event.target.value = '';
+  }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -163,12 +160,17 @@ function handleCsvChange(
   }
 
   return (
-    <form onSubmit={handleSubmit} className="card-padded">
+    <form
+      id="schema-input"
+      onSubmit={handleSubmit}
+      className="card-padded"
+    >
       <div className="grid gap-4">
         <div>
           <label htmlFor={relationId} className="label">
             Relation name
           </label>
+
           <input
             id={relationId}
             className="input"
@@ -183,6 +185,7 @@ function handleCsvChange(
           <label htmlFor={schemaId} className="label">
             Schema
           </label>
+
           <textarea
             id={schemaId}
             className="input min-h-56 font-mono text-sm"
@@ -191,6 +194,7 @@ function handleCsvChange(
             spellCheck={false}
             aria-describedby={`${schemaId}-hint`}
           />
+
           <p
             id={`${schemaId}-hint`}
             className="mt-1.5 text-xs text-slate-500 dark:text-slate-400"
@@ -216,29 +220,34 @@ function handleCsvChange(
 
         <div className="flex flex-wrap items-center gap-2">
           <button
-  type="button"
-  className="btn-secondary"
-  onClick={handleCreateTableImport}
->
-  Import CREATE TABLE
-</button>
+            type="button"
+            className="btn-secondary"
+            onClick={handleCreateTableImport}
+          >
+            Import CREATE TABLE
+          </button>
 
-<button
-  type="button"
-  className="btn-secondary"
-  onClick={handleCsvClick}
->
-  Import CSV
-</button>
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={handleCsvClick}
+          >
+            Import CSV
+          </button>
 
-<input
-  ref={fileInputRef}
-  type="file"
-  accept=".csv,text/csv"
-  className="hidden"
-  onChange={handleCsvChange}
-/>
-<button type="submit" className="btn-primary" disabled={isAnalyzing}>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,text/csv"
+            className="hidden"
+            onChange={handleCsvChange}
+          />
+
+          <button
+            type="submit"
+            className="btn-primary"
+            disabled={isAnalyzing}
+          >
             {isAnalyzing ? 'Analysing…' : 'Analyse schema'}
           </button>
 
