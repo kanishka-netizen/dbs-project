@@ -65,9 +65,14 @@ HTTP **200** with `valid: true`.
   "highestNormalForm": "BCNF",
 
   "violations": [],
+"decomposition": [],
 
-  "decomposition": [],
-  "bcnfDecomposition": [
+"decompositionProperties": {
+  "lossless": true,
+  "dependencyPreserving": true
+},
+
+"bcnfDecomposition": [
     {
       "name": "BCNF_R1",
       "attributes": ["Supplier", "Part", "Project"],
@@ -126,6 +131,7 @@ HTTP **200** with `valid: true`.
 | `highestNormalForm` | `NormalForm` | Overall winner, reconciled across both verdict objects |
 | `violations` | `NormalFormViolation[]` | Functional-dependency violations, 2NF–BCNF |
 | `decomposition` | `DecomposedRelation[]` | 2NF **or** 3NF decomposition, whichever applies |
+| `decompositionProperties` | `{ lossless: boolean, dependencyPreserving: boolean }` | Whether the resulting decomposition is lossless-join and dependency-preserving |
 | `bcnfDecomposition` | `DecomposedRelation[]` | BCNF analysis algorithm output |
 | `higherNormalForms` | `HigherNormalFormResult` | 4NF/5NF verdicts, violations, decomposition |
 | `steps` | `NormalizationStep[]` | Numbered walkthrough, 1 → 8 |
