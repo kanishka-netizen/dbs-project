@@ -1,6 +1,9 @@
-import { useId, useState } from 'react';
-import type { FormEvent } from 'react';
-
+import { useId, useRef, useState } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
+import {
+  parseCreateTable,
+  parseCsv,
+} from './schema-import';
 import type { AnalyzeNormalizationRequest } from '../../types/normalization';
 import { SCHEMA_EXAMPLES } from './schema-examples';
 import { parseSchema, type ParseIssue } from './schema-text';
@@ -25,9 +28,107 @@ export function SchemaInput({
   );
   const [schemaText, setSchemaText] = useState(DEFAULT_EXAMPLE.schemaText);
   const [issues, setIssues] = useState<ParseIssue[]>([]);
-
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const relationId = useId();
   const schemaId = useId();
+  function applyImportedSchema(
+  attributes: string[],
+  functionalDependencies: AnalyzeNormalizationRequest['functionalDependencies'],
+  multivaluedDependencies: NonNullable<
+  AnalyzeNormalizationRequest['multivaluedDependencies']
+>,
+) {
+  setSchemaText(
+    [
+      attributes.join(', '),
+      ...functionalDependencies.map(
+        (fd) => `${fd.left.join(', ')} -> ${fd.right.join(', ')}`,
+      ),
+      ...multivaluedDependencies.map(
+        (mvd) => `${mvd.left.join(', ')} ->> ${mvd.right.join(', ')}`,
+      ),
+    ].join('\n'),
+  );
+
+  setIssues([]);
+}
+
+function handleCreateTableImport() {
+  const sql = window.prompt(
+    'Paste your CREATE TABLE statement:',
+  );
+
+  if (!sql) {
+    return;
+  }
+
+  const result = parseCreateTable(sql);
+
+  if (result.issues.length > 0 || result.schema.attributes.length === 0) {
+    setIssues(
+      result.issues.map((issue) => ({
+        line: 1,
+        message: issue.message,
+      })),
+    );
+    return;
+  }
+
+  setRelationName('R');
+
+  applyImportedSchema(
+    result.schema.attributes,
+    result.schema.functionalDependencies,
+    result.schema.multivaluedDependencies,
+  );
+}
+
+function handleCsvClick() {
+  fileInputRef.current?.click();
+}
+function handleCsvChange(
+  event: ChangeEvent<HTMLInputElement>,
+) {  const file = event.target.files?.[0];
+
+  if (!file) {
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    const text = String(reader.result ?? '');
+    const result = parseCsv(text);
+
+    if (
+      result.issues.length > 0 ||
+      result.schema.attributes.length === 0
+    ) {
+      setIssues(
+        result.issues.map((issue) => ({
+          line: 1,
+          message: issue.message,
+        })),
+      );
+      return;
+    }
+
+    setRelationName(
+      file.name.replace(/\.csv$/i, '') || 'R',
+    );
+
+    applyImportedSchema(
+      result.schema.attributes,
+      result.schema.functionalDependencies,
+      result.schema.multivaluedDependencies,
+    );
+  };
+
+  reader.readAsText(file);
+
+  // Allow selecting the same file again later.
+  event.target.value = '';
+}
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -114,7 +215,30 @@ export function SchemaInput({
         )}
 
         <div className="flex flex-wrap items-center gap-2">
-          <button type="submit" className="btn-primary" disabled={isAnalyzing}>
+          <button
+  type="button"
+  className="btn-secondary"
+  onClick={handleCreateTableImport}
+>
+  Import CREATE TABLE
+</button>
+
+<button
+  type="button"
+  className="btn-secondary"
+  onClick={handleCsvClick}
+>
+  Import CSV
+</button>
+
+<input
+  ref={fileInputRef}
+  type="file"
+  accept=".csv,text/csv"
+  className="hidden"
+  onChange={handleCsvChange}
+/>
+<button type="submit" className="btn-primary" disabled={isAnalyzing}>
             {isAnalyzing ? 'Analysing…' : 'Analyse schema'}
           </button>
 

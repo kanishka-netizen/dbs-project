@@ -150,6 +150,34 @@ function exportMarkdown() {
         </section>
       )}
 
+      {analysis.decompositionProperties && (
+  <section className="card-padded">
+    <h2 className="section-title">Decomposition Properties</h2>
+
+    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+      <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-700">
+        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+          Lossless Join
+        </p>
+        <p className="mt-1 text-lg font-semibold">
+          {analysis.decompositionProperties.lossless ? 'Yes' : 'No'}
+        </p>
+      </div>
+
+      <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-700">
+        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+          Dependency Preserving
+        </p>
+        <p className="mt-1 text-lg font-semibold">
+          {analysis.decompositionProperties.dependencyPreserving
+            ? 'Yes'
+            : 'No'}
+        </p>
+      </div>
+    </div>
+  </section>
+)}
+
       {/* Normalized relations */}
       <section aria-labelledby="normalized-relations-heading">
         <div className="mb-4">
