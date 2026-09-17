@@ -10,6 +10,8 @@ import { BCNFEngine } from './engines/bcnf.engine.js';
 import { StepsEngine } from './engines/steps.engine.js';
 import { ValidationEngine } from './engines/validation.engine.js';
 import { HigherNormalFormResult } from './engines/higher-nf.types.js';
+import { HigherNFEngine } from './engines/higher-nf.engine.js';
+
 @Injectable()
 export class NormalizationService {
   analyze(data: AnalyzeNormalizationDto) {
@@ -62,15 +64,12 @@ export class NormalizationService {
       data.attributes,
       data.functionalDependencies,
     );
-    const higherNormalForms: HigherNormalFormResult = {
-     normalForms: {
-       '4NF': false,
-       '5NF': false,
-      },
-      highestNormalForm: null,
-     violations: [],
-     decomposition: [],
-    };
+    const higherNormalForms: HigherNormalFormResult=HigherNFEngine.analyze(
+    data.attributes,
+    data.functionalDependencies,
+    data.multivaluedDependencies ?? [],
+    candidateKeys,
+);
     const steps = StepsEngine.generateSteps(
     data.attributes,
      data.functionalDependencies,
