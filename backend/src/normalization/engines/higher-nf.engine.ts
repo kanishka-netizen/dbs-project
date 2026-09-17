@@ -7,6 +7,13 @@ import {
 } from './higher-nf.types.js';
 
 /**
+ * An earlier revision of this module declared `MultivaluedDependency` itself.
+ * It now lives in `mvd.engine.js` alongside the operations on it, and is
+ * re-exported from here so imports written against the old path keep working.
+ */
+export type { MultivaluedDependency };
+
+/**
  * An explicit join dependency: R is the lossless join of these relations.
  *
  * Unlike a candidate derived from multivalued dependencies, an explicit join
