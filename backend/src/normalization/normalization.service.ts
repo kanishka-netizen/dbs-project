@@ -9,7 +9,7 @@ import {
 import { BCNFEngine } from './engines/bcnf.engine.js';
 import { StepsEngine } from './engines/steps.engine.js';
 import { ValidationEngine } from './engines/validation.engine.js';
-
+import { HigherNormalFormResult } from './engines/higher-nf.types.js';
 @Injectable()
 export class NormalizationService {
   analyze(data: AnalyzeNormalizationDto) {
@@ -40,8 +40,8 @@ export class NormalizationService {
       candidateKeys,
     );
 
-    // Step 3: Generate decomposition based on the highest
-    // normal form that is currently violated
+    //Step 3: Generate decomposition based on the highest
+    //normal form that is currently violated
     let decomposition: DecomposedRelation[] = [];
 
     if (!normalFormAnalysis.normalForms['2NF']) {
@@ -57,11 +57,20 @@ export class NormalizationService {
       );
     }
 
-    // Step 4: Generate BCNF decomposition
+    //Step 4: Generate BCNF decomposition
     const bcnfDecomposition = BCNFEngine.decompose(
       data.attributes,
       data.functionalDependencies,
     );
+    const higherNormalForms: HigherNormalFormResult = {
+     normalForms: {
+       '4NF': false,
+       '5NF': false,
+      },
+      highestNormalForm: null,
+     violations: [],
+     decomposition: [],
+    };
     const steps = StepsEngine.generateSteps(
     data.attributes,
      data.functionalDependencies,
@@ -70,7 +79,7 @@ export class NormalizationService {
       normalFormAnalysis.highestNormalForm,
      normalFormAnalysis.violations,
     );
-    // Step 5: Return complete analysis
+    //Step 5: Return complete analysis
     return {
       relation: data.relationName,
       valid: true,
@@ -94,8 +103,10 @@ export class NormalizationService {
       decomposition,
 
       bcnfDecomposition,
+      higherNormalForms,
       steps,
       warnings: validation.warnings,
     };
+
   }
 }
