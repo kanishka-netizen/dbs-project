@@ -2,6 +2,7 @@ import { PageContainer, PageHeader } from '../components/layout/PageContainer';
 import { AssistantPanel } from '../features/assistant/AssistantPanel';
 import { SchemaInput } from '../features/normalization/SchemaInput';
 import { useNormalizationAnalysis } from '../features/normalization/useNormalizationAnalysis';
+import { PromptLog } from '../features/assistant/PromptLog';
 
 export function AssistantPage() {
   const { state, analyze } = useNormalizationAnalysis();
@@ -28,21 +29,10 @@ export function AssistantPage() {
           </p>
         )}
 
-        {analysis && !analysis.valid && (
-          <section className="card-padded">
-            <h2 className="section-title">
-              The schema could not be analysed
-            </h2>
-            <ul className="notice-error mt-4 space-y-1">
-              {analysis.errors.map((error) => (
-                <li key={error}>{error}</li>
-              ))}
-            </ul>
-          </section>
-        )}
+        
 
         {analysis?.valid && <AssistantPanel analysis={analysis} />}
-
+        <PromptLog />
         <section className="card-padded">
           <h2 className="section-title">AI prompt log</h2>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
