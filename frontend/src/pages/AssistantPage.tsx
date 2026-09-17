@@ -32,15 +32,8 @@ export function AssistantPage() {
         
 
         {analysis?.valid && <AssistantPanel analysis={analysis} />}
+        
         <PromptLog />
-        <section className="card-padded">
-          <h2 className="section-title">AI prompt log</h2>
-          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            Every prompt and response used during development is recorded,
-            alongside the generated explanation for each analysis. This panel is
-            Team 3&rsquo;s next deliverable.
-          </p>
-        </section>
       </div>
     </PageContainer>
   );
