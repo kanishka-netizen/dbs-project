@@ -7,6 +7,7 @@ import {
   DecomposedRelation,
 } from './engines/decomposition.engine.js';
 import { BCNFEngine } from './engines/bcnf.engine.js';
+import { StepsEngine } from './engines/steps.engine.js';
 
 @Injectable()
 export class NormalizationService {
@@ -46,7 +47,14 @@ export class NormalizationService {
       data.attributes,
       data.functionalDependencies,
     );
-
+    const steps = StepsEngine.generateSteps(
+    data.attributes,
+     data.functionalDependencies,
+     candidateKeys,
+     normalFormAnalysis.normalForms,
+      normalFormAnalysis.highestNormalForm,
+     normalFormAnalysis.violations,
+    );
     // Step 5: Return complete analysis
     return {
       relation: data.relationName,
@@ -70,6 +78,7 @@ export class NormalizationService {
       decomposition,
 
       bcnfDecomposition,
+      steps,
     };
   }
 }
