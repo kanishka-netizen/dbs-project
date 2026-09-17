@@ -8,15 +8,30 @@ import {
 } from './engines/decomposition.engine.js';
 import { BCNFEngine } from './engines/bcnf.engine.js';
 import { StepsEngine } from './engines/steps.engine.js';
+import { ValidationEngine } from './engines/validation.engine.js';
 
 @Injectable()
 export class NormalizationService {
   analyze(data: AnalyzeNormalizationDto) {
-    // Step 1: Find candidate keys
-    const candidateKeys = CandidateKeyEngine.findCandidateKeys(
-      data.attributes,
-      data.functionalDependencies,
-    );
+  const validation = ValidationEngine.validate(
+    data.attributes,
+    data.functionalDependencies,
+  );
+
+  if (!validation.valid) {
+    return {
+      relation: data.relationName,
+      valid: false,
+      errors: validation.errors,
+      warnings: validation.warnings,
+    };
+  }
+
+  // Step 1: Find candidate keys
+  const candidateKeys = CandidateKeyEngine.findCandidateKeys(
+    data.attributes,
+    data.functionalDependencies,
+  );
 
     // Step 2: Analyze normal forms
     const normalFormAnalysis = NormalFormEngine.analyze(
@@ -58,6 +73,7 @@ export class NormalizationService {
     // Step 5: Return complete analysis
     return {
       relation: data.relationName,
+      valid: true,
       attributes: data.attributes,
 
       functionalDependencies: data.functionalDependencies,
@@ -79,6 +95,7 @@ export class NormalizationService {
 
       bcnfDecomposition,
       steps,
+      warnings: validation.warnings,
     };
   }
 }
