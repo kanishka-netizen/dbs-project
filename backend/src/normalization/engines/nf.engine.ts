@@ -99,11 +99,21 @@ export class NormalFormEngine {
      * OR
      * A is a prime attribute.
      */
-    let is3NF = true;
+    let is3NF = is2NF;
 
     for (const dependency of dependencies) {
       const left = dependency.left;
       const right = dependency.right;
+
+      // A dependency whose right-hand side already sits in the left-hand side
+      // is trivial and holds in every relation.
+      const nonTrivialRight = right.filter(
+        (attribute) => !left.includes(attribute),
+      );
+
+      if (nonTrivialRight.length === 0) {
+        continue;
+      }
 
       const leftClosure = this.attributeClosure(
         left,
@@ -114,11 +124,15 @@ export class NormalFormEngine {
         leftClosure.has(attribute),
       );
 
-      const determinesNonPrime = right.some((attribute) =>
+      if (isSuperkey) {
+        continue;
+      }
+
+      const determinesNonPrime = nonTrivialRight.some((attribute) =>
         nonPrimeAttributes.includes(attribute),
       );
 
-      if (!isSuperkey && determinesNonPrime) {
+      if (determinesNonPrime) {
         is3NF = false;
 
         violations.push({
@@ -137,11 +151,21 @@ export class NormalFormEngine {
      *
      * X must be a superkey.
      */
-    let isBCNF = true;
+    let isBCNF = is3NF;
 
     for (const dependency of dependencies) {
       const left = dependency.left;
       const right = dependency.right;
+
+      // Trivial dependencies such as A -> A are always satisfied and can never
+      // make a relation fail BCNF.
+      const nonTrivialRight = right.filter(
+        (attribute) => !left.includes(attribute),
+      );
+
+      if (nonTrivialRight.length === 0) {
+        continue;
+      }
 
       const leftClosure = this.attributeClosure(
         left,
