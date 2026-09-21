@@ -270,6 +270,13 @@ export class HigherNormalFormEngine {
     joinDependencies: JoinDependency[],
   ): JoinCandidate[] {
     const candidates: JoinCandidate[] = [
+      // The dependency-basis split is finer than the one derived from a single
+      // MVD, so it is offered first: when both hold, the finer decomposition is
+      // the more useful answer.
+      ...this.candidatesFromDependencyBasis(
+        allAttributes,
+        expandedMultivaluedDependencies,
+      ).map((relations) => ({ relations, asserted: false })),
       ...this.candidatesFromMultivaluedDependencies(
         allAttributes,
         expandedMultivaluedDependencies,
@@ -365,6 +372,87 @@ export class HigherNormalFormEngine {
     }
 
     return candidates;
+  }
+
+  /**
+   * Candidates derived from the dependency basis of each determinant.
+   *
+   * A single MVD only ever yields the three-way split above. But when several
+   * MVDs share a determinant — `X ->> Y1`, `X ->> Y2`, and so on — they jointly
+   * pin down a *finer* join dependency: `{X ∪ B1, X ∪ B2, ...}`, where the B's
+   * are the disjoint blocks of the dependency basis of X.
+   *
+   * That is the case a relation with three or more independent facts falls
+   * into, and the case the single-MVD derivation cannot see.
+   */
+  private static candidatesFromDependencyBasis(
+    allAttributes: string[],
+    multivaluedDependencies: MultivaluedDependency[],
+  ): string[][][] {
+    const byDeterminant = new Map<
+      string,
+      { left: string[]; rights: string[][] }
+    >();
+
+    for (const dependency of multivaluedDependencies) {
+      if (MvdEngine.isTrivial(dependency, allAttributes)) {
+        continue;
+      }
+
+      const key = [...dependency.left].sort().join('|');
+      const entry = byDeterminant.get(key) ?? {
+        left: [...dependency.left],
+        rights: [],
+      };
+
+      entry.rights.push([...dependency.right]);
+      byDeterminant.set(key, entry);
+    }
+
+    const candidates: string[][][] = [];
+
+    for (const { left, rights } of byDeterminant.values()) {
+      const remainder = allAttributes.filter(
+        (attribute) => !left.includes(attribute),
+      );
+
+      const blocks = this.disjointBlocks(remainder, rights);
+
+      // Two blocks is the binary split 4NF already handles.
+      if (blocks.length < 3) {
+        continue;
+      }
+
+      candidates.push(blocks.map((block) => this.union(left, block)));
+    }
+
+    return candidates;
+  }
+
+  /**
+   * Refines a family of attribute sets into disjoint blocks: two attributes
+   * share a block exactly when they belong to the same sets. Attributes in no
+   * set at all fall into a block of their own, which is how the part of `R - X`
+   * that no MVD mentions is accounted for.
+   */
+  private static disjointBlocks(
+    attributes: string[],
+    groups: string[][],
+  ): string[][] {
+    const bySignature = new Map<string, string[]>();
+
+    for (const attribute of attributes) {
+      const signature = groups
+        .map((group) => (group.includes(attribute) ? '1' : '0'))
+        .join('');
+
+      const block = bySignature.get(signature) ?? [];
+
+      block.push(attribute);
+      bySignature.set(signature, block);
+    }
+
+    return [...bySignature.values()];
   }
 
   /* --------------------------------------------------------------- helpers */

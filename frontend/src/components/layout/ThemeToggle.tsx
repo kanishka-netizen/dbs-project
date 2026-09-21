@@ -1,57 +1,56 @@
 import { useTheme } from '../../theme/useTheme';
+import type { ThemePreference } from '../../theme/theme-context';
 
-/** Day/night toggle — owned by Team 2 (TripleX). */
+interface Option {
+  value: ThemePreference;
+  label: string;
+  hint: string;
+}
+
+const OPTIONS: Option[] = [
+  { value: 'light', label: 'Day', hint: 'always use day mode' },
+  { value: 'dark', label: 'Night', hint: 'always use night mode' },
+  { value: 'system', label: 'Auto', hint: 'follow the operating system' },
+];
+
+/**
+ * Day / night / auto selector — owned by Team 2 (TripleX).
+ *
+ * A three-way control rather than a two-state toggle, so "follow the system"
+ * is something the user can choose and see, rather than a hidden default they
+ * only discover by wondering why the app changed colour at sunset.
+ */
 export function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme();
-  const isDark = theme === 'dark';
+  const { preference, setPreference } = useTheme();
 
   return (
-    <button
-      type="button"
-      onClick={toggleTheme}
-      className="btn-ghost px-2.5"
-      aria-label={isDark ? 'Switch to day mode' : 'Switch to night mode'}
-      title={isDark ? 'Switch to day mode' : 'Switch to night mode'}
+    <div
+      role="group"
+      aria-label="Colour theme"
+      className="no-print flex items-center gap-0.5 rounded-lg border border-slate-200 p-0.5 dark:border-slate-700"
     >
-      {isDark ? (
-        <SunIcon className="size-5" />
-      ) : (
-        <MoonIcon className="size-5" />
-      )}
-    </button>
-  );
-}
+      {OPTIONS.map((option) => {
+        const isActive = preference === option.value;
 
-function SunIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      aria-hidden="true"
-    >
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-    </svg>
-  );
-}
-
-function MoonIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-    </svg>
+        return (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() => setPreference(option.value)}
+            aria-pressed={isActive}
+            title={option.hint}
+            className={[
+              'cursor-pointer rounded-md px-2 py-1 text-xs font-medium transition-colors',
+              isActive
+                ? 'bg-brand-600 text-white'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100',
+            ].join(' ')}
+          >
+            <span aria-hidden="true">{option.label}</span>
+            <span className="sr-only"> — {option.hint}</span>
+          </button>
+        );
+      })}
+    </div>
   );
 }

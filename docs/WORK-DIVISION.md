@@ -7,29 +7,42 @@ Every deliverable mapped to a team and a person, with what is already in place a
 
 ---
 
-## Status at the time of writing
+## Status
 
-A working baseline is committed on `main`. It is a **starting point, not the finish line** — each
-team extends its own area.
+A working application is committed on `main`. It is complete through 1NF → 5NF on the backend and
+the BCNF/5NF visualizers on the frontend; **Team 1's slice has not been started.**
 
 | Area | State |
 | --- | --- |
 | NestJS pipeline, one endpoint | done |
 | 1NF / 2NF / 3NF / BCNF verdicts | done |
 | 2NF, 3NF and BCNF decomposition | done |
+| BCNF decomposition is **deterministic** and reports each split with its driving dependency | done — Team 2 |
 | Multivalued dependency engine + tableau chase | done |
-| 4NF and 5NF analysis | done |
+| 4NF and 5NF analysis, including dependency-basis splits | done |
+| Losslessness and dependency-preservation reporting | done |
 | Step-by-step walkthrough, 1NF → 5NF | done |
-| React app, routing, navigation, day/night mode | done |
-| Schema text parser + input form + 5 examples | done |
+| React app, routing, navigation, day/night/auto theme | done |
+| Schema text parser, plus CSV and `CREATE TABLE` import | done |
 | Results shell: verdict strip, keys, violations, steps | done |
-| Learn content, all six normal forms | seeded, needs depth |
-| 4NF / BCNF / 5NF result panels | done |
-| Assistant: target schema + JSON export | done, needs depth |
-| Report generation (Markdown, PDF) | **not started** |
-| AI prompt log | **not started** |
-| References list | **not started** |
-| Interactive per-form visualizers | **not started** |
+| BCNF decomposition visualizer with the per-split trace | done — Team 2 |
+| 5NF join-dependency visualizer | done — Team 2 |
+| Loading skeletons, error retry, empty states | done |
+| Accessibility: live-region results, labelled controls, reduced motion | done |
+| Print stylesheet | done |
+| Learn content, all six normal forms | done |
+| Glossary and FAQ | done |
+| Assistant: target schema, normalisation path, exports | done |
+| Report generation (JSON, Markdown) | done — Team 3 |
+| AI prompt log | done — Team 3 |
+| References list | **outstanding — Team 1** |
+| Interactive 1NF–3NF visualizers | **outstanding — Team 1** |
+| 4NF visualizer depth | **outstanding — Team 1** |
+| PDF export | outstanding |
+| Responsive behaviour verified at real breakpoints | partial — never audited on a device |
+| Contrast verified against WCAG AA with a tool | partial — palette reviewed by eye only |
+
+**91 tests pass** (55 backend, 36 frontend); lint is clean and both workspaces build.
 
 ---
 

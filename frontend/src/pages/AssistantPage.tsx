@@ -1,11 +1,14 @@
+import { AnalysisSkeleton } from '../components/common/AnalysisSkeleton';
+import { EmptyState } from '../components/common/EmptyState';
+import { ErrorNotice } from '../components/common/ErrorNotice';
 import { PageContainer, PageHeader } from '../components/layout/PageContainer';
 import { AssistantPanel } from '../features/assistant/AssistantPanel';
+import { PromptLog } from '../features/assistant/PromptLog';
 import { SchemaInput } from '../features/normalization/SchemaInput';
 import { useNormalizationAnalysis } from '../features/normalization/useNormalizationAnalysis';
-import { PromptLog } from '../features/assistant/PromptLog';
 
 export function AssistantPage() {
-  const { state, analyze } = useNormalizationAnalysis();
+  const { state, analyze, retry } = useNormalizationAnalysis();
 
   const analysis = state.status === 'success' ? state.response : null;
 
@@ -23,10 +26,28 @@ export function AssistantPage() {
           isAnalyzing={state.status === 'loading'}
         />
 
+        {state.status === 'loading' && <AnalysisSkeleton />}
+
         {state.status === 'error' && (
-          <p className="notice-error" role="alert">
-            {state.message}
-          </p>
+          <ErrorNotice message={state.message} onRetry={retry} />
+        )}
+
+        {state.status === 'idle' && (
+          <EmptyState title="Nothing to normalise yet">
+            Enter a schema above and the assistant will work out the relations
+            it should become, then let you export the result.
+          </EmptyState>
+        )}
+
+        {analysis && !analysis.valid && (
+          <section className="card-padded">
+            <h2 className="section-title">The schema could not be analysed</h2>
+            <ul className="notice-error mt-4 space-y-1">
+              {analysis.errors.map((error) => (
+                <li key={error}>{error}</li>
+              ))}
+            </ul>
+          </section>
         )}
 
         {analysis?.valid && (

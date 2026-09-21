@@ -48,32 +48,51 @@ export class DecompositionPropertiesEngine {
       return true;
     }
 
-    if (decomposition.length === 0) {
-      return false;
-    }
-
-    const projectedDependencies =
-      this.projectDependencies(
+    return (
+      this.findUnpreservedDependencies(
         decomposition,
         functionalDependencies,
-      );
+      ).length === 0
+    );
+  }
 
-    for (const dependency of functionalDependencies) {
+  /**
+   * The dependencies the decomposition fails to preserve.
+   *
+   * Returning the offenders rather than a bare boolean is what lets the UI say
+   * *which* dependency BCNF cost you, which is the whole point of comparing it
+   * against 3NF. An empty decomposition preserves nothing.
+   */
+  static findUnpreservedDependencies(
+    decomposition: string[][],
+    functionalDependencies: FunctionalDependency[],
+  ): FunctionalDependency[] {
+    if (functionalDependencies.length === 0) {
+      return [];
+    }
+
+    if (decomposition.length === 0) {
+      return functionalDependencies.map((dependency) => ({
+        left: [...dependency.left],
+        right: [...dependency.right],
+      }));
+    }
+
+    const projectedDependencies = this.projectDependencies(
+      decomposition,
+      functionalDependencies,
+    );
+
+    return functionalDependencies.filter((dependency) => {
       const closure = CandidateKeyEngine.attributeClosure(
         dependency.left,
         projectedDependencies,
       );
 
-      const preserved = dependency.right.every((attribute) =>
+      return !dependency.right.every((attribute) =>
         closure.includes(attribute),
       );
-
-      if (!preserved) {
-        return false;
-      }
-    }
-
-    return true;
+    });
   }
 
   private static projectDependencies(

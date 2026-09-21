@@ -62,6 +62,24 @@ export interface DecomposedRelation {
   reason: string;
 }
 
+/** One split performed by the BCNF analysis algorithm. */
+export interface BCNFSplitStep {
+  step: number;
+  /** The relation that was split. */
+  sourceRelation: string;
+  sourceAttributes: string[];
+  /** The dependency whose determinant was not a superkey, e.g. `'Instructor → Course'`. */
+  violatingDependency: string;
+  reason: string;
+  produced: { name: string; attributes: string[] }[];
+}
+
+/** Whether a decomposition is lossless and dependency preserving. */
+export interface DecompositionProperties {
+  lossless: boolean;
+  dependencyPreserving: boolean;
+}
+
 export interface NormalizationStep {
   step: number;
   title: string;
@@ -96,10 +114,15 @@ export interface NormalizationAnalysis {
   decomposition: DecomposedRelation[];
   /** The BCNF analysis algorithm output. */
   bcnfDecomposition: DecomposedRelation[];
-  decompositionProperties?: {
-  lossless: boolean;
-  dependencyPreserving: boolean;
-};
+  /** Every split the BCNF algorithm performed, in order. */
+  bcnfSteps: BCNFSplitStep[];
+  /** Properties of the BCNF decomposition. */
+  bcnfProperties: DecompositionProperties & {
+    /** Dependencies BCNF cost you, e.g. `'Instructor → Course'`. */
+    unpreservedDependencies: string[];
+  };
+  /** Properties of the decomposition the assistant would apply. */
+  decompositionProperties: DecompositionProperties;
   /** The 4NF/5NF analysis output. */
   higherNormalForms: HigherNormalFormResult;
 

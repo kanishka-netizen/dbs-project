@@ -61,6 +61,19 @@ const mockAnalysis: NormalizationAnalysis = {
 
   bcnfDecomposition: [],
 
+  bcnfSteps: [],
+
+  bcnfProperties: {
+    lossless: true,
+    dependencyPreserving: true,
+    unpreservedDependencies: [],
+  },
+
+  decompositionProperties: {
+    lossless: true,
+    dependencyPreserving: true,
+  },
+
   higherNormalForms: {
     normalForms: {
       '4NF': true,

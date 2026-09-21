@@ -33,6 +33,21 @@
   --color-warn-600: oklch(0.681 0.162 75.834);
   --color-danger-500: oklch(0.637 0.237 25.331);
   --color-danger-600: oklch(0.577 0.245 27.325);
+
+  /* Used by the decomposition views to reveal each split in turn. */
+  --animate-reveal: reveal 320ms ease-out both;
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @layer base {
@@ -51,6 +66,25 @@
 
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+
+  /*
+   * Honour the operating system's reduced-motion preference. The reveal
+   * animations are decorative, so they are collapsed rather than merely
+   * shortened — a 0.01ms duration still fires the animation events.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+
+    html {
+      scroll-behavior: auto;
+    }
   }
 }
 
@@ -150,4 +184,55 @@
 
 @utility notice-error {
   @apply rounded-lg border border-danger-500/40 bg-danger-500/10 px-4 py-3 text-sm text-slate-800 dark:text-slate-200;
+}
+
+/* ---- Print ----
+ *
+ * Results are meant to be attached to a submission, so the printed page hides
+ * the interactive chrome, forces the light palette, and keeps a relation from
+ * being split across a page break.
+ */
+
+.no-print {
+  /* Applied to controls that make no sense on paper. */
+}
+
+.print-only {
+  display: none;
+}
+
+@media print {
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .no-print,
+  header nav,
+  footer,
+  button {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .card,
+  .card-padded {
+    border-color: #cbd5e1 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  /* Keep the badges and chips legible without their tinted backgrounds. */
+  .badge,
+  .chip {
+    border: 1px solid #cbd5e1;
+  }
+
+  a[href]::after {
+    content: '';
+  }
 }

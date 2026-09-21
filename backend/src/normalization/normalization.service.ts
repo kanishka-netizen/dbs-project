@@ -12,6 +12,7 @@ import { ValidationEngine } from './engines/validation.engine.js';
 import { HigherNormalFormEngine } from './engines/higher-nf.engine.js';
 import { HigherNormalFormResult } from './engines/higher-nf.types.js';
 import { DecompositionPropertiesEngine } from './engines/decomposition-properties.engine.js';
+import type { FunctionalDependency } from './engines/candidate-key.engine.js';
 
 @Injectable()
 export class NormalizationService {
@@ -30,8 +31,7 @@ export class NormalizationService {
       };
     }
 
-    const multivaluedDependencies =
-      data.multivaluedDependencies ?? [];
+    const multivaluedDependencies = data.multivaluedDependencies ?? [];
 
     // Step 1: Find candidate keys
     const candidateKeys = CandidateKeyEngine.findCandidateKeys(
@@ -63,11 +63,36 @@ export class NormalizationService {
       );
     }
 
-    // Step 4: Generate the BCNF decomposition
-    const bcnfDecomposition = BCNFEngine.decompose(
+    // Step 4: Generate the BCNF decomposition, keeping the split trace and
+    // reporting whether the decomposition kept every dependency
+    const bcnfAnalysis = BCNFEngine.analyze(
       data.attributes,
       data.functionalDependencies,
     );
+
+    const bcnfDecomposition = bcnfAnalysis.relations;
+    const bcnfAttributes = bcnfDecomposition.map(
+      (relation) => relation.attributes,
+    );
+
+    const unpreservedDependencies =
+      DecompositionPropertiesEngine.findUnpreservedDependencies(
+        bcnfAttributes,
+        data.functionalDependencies,
+      );
+
+    const bcnfProperties = {
+      lossless: DecompositionPropertiesEngine.isLossless(
+        bcnfAttributes,
+        data.attributes,
+        data.functionalDependencies,
+        multivaluedDependencies,
+      ),
+      dependencyPreserving: unpreservedDependencies.length === 0,
+      unpreservedDependencies: unpreservedDependencies.map((dependency) =>
+        this.formatDependency(dependency),
+      ),
+    };
 
     // Step 5: Analyse 4NF and 5NF from the multivalued dependencies. The BCNF
     // verdict is passed in because 4NF implies BCNF, so a relation that has not
@@ -90,33 +115,36 @@ export class NormalizationService {
       normalFormAnalysis.violations,
       higherNormalForms,
     );
+
+    // Step 7: Report the properties of the decomposition the assistant would
+    // actually apply — the strongest one available.
     const finalDecomposition =
-  higherNormalForms.decomposition.length > 0
-    ? higherNormalForms.decomposition
-    : bcnfDecomposition.length > 0
-      ? bcnfDecomposition
-      : decomposition.length > 0
-        ? decomposition
-        : [{ attributes: data.attributes }];
+      higherNormalForms.decomposition.length > 0
+        ? higherNormalForms.decomposition
+        : bcnfDecomposition.length > 0
+          ? bcnfDecomposition
+          : decomposition.length > 0
+            ? decomposition
+            : [{ attributes: data.attributes }];
 
-const decompositionAttributes = finalDecomposition.map(
-  (relation) => relation.attributes,
-);
+    const decompositionAttributes = finalDecomposition.map(
+      (relation) => relation.attributes,
+    );
 
-const decompositionProperties =
-  DecompositionPropertiesEngine.isLossless(
-    decompositionAttributes,
-    data.attributes,
-    data.functionalDependencies,
-    multivaluedDependencies,
-  );
+    const decompositionProperties = {
+      lossless: DecompositionPropertiesEngine.isLossless(
+        decompositionAttributes,
+        data.attributes,
+        data.functionalDependencies,
+        multivaluedDependencies,
+      ),
+      dependencyPreserving: DecompositionPropertiesEngine.isDependencyPreserving(
+        decompositionAttributes,
+        data.functionalDependencies,
+      ),
+    };
 
-const dependencyPreserving =
-  DecompositionPropertiesEngine.isDependencyPreserving(
-    decompositionAttributes,
-    data.functionalDependencies,
-  );
-    // Step 7: Return the complete analysis
+    // Step 8: Return the complete analysis
     return {
       relation: data.relationName,
       valid: true,
@@ -125,14 +153,10 @@ const dependencyPreserving =
 
       functionalDependencies: data.functionalDependencies,
 
-      
       multivaluedDependencies,
 
       candidateKeys,
-      decompositionProperties: {
-  lossless: decompositionProperties,
-  dependencyPreserving,
-},
+
       normalForms: normalFormAnalysis.normalForms,
 
       highestNormalForm: this.resolveHighestNormalForm(
@@ -145,6 +169,12 @@ const dependencyPreserving =
       decomposition,
 
       bcnfDecomposition,
+
+      bcnfSteps: bcnfAnalysis.steps,
+
+      bcnfProperties,
+
+      decompositionProperties,
 
       higherNormalForms,
 
@@ -165,5 +195,9 @@ const dependencyPreserving =
     higherNormalForms: HigherNormalFormResult,
   ): string {
     return higherNormalForms.highestNormalForm ?? base;
+  }
+
+  private formatDependency(dependency: FunctionalDependency): string {
+    return `${dependency.left.join(', ')} → ${dependency.right.join(', ')}`;
   }
 }

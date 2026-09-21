@@ -76,9 +76,17 @@ HTTP **200** with `valid: true`.
     {
       "name": "BCNF_R1",
       "attributes": ["Supplier", "Part", "Project"],
-      "reason": "Relation satisfies BCNF after decomposition."
+      "reason": "Already satisfied BCNF, so this relation was never split."
     }
   ],
+
+  "bcnfSteps": [],
+
+  "bcnfProperties": {
+    "lossless": true,
+    "dependencyPreserving": true,
+    "unpreservedDependencies": []
+  },
 
   "higherNormalForms": {
     "normalForms": { "4NF": false, "5NF": false },
@@ -133,6 +141,8 @@ HTTP **200** with `valid: true`.
 | `decomposition` | `DecomposedRelation[]` | 2NF **or** 3NF decomposition, whichever applies |
 | `decompositionProperties` | `{ lossless: boolean, dependencyPreserving: boolean }` | Whether the resulting decomposition is lossless-join and dependency-preserving |
 | `bcnfDecomposition` | `DecomposedRelation[]` | BCNF analysis algorithm output |
+| `bcnfSteps` | `BCNFSplitStep[]` | Every split the BCNF algorithm performed, in order. See below |
+| `bcnfProperties` | `{ lossless, dependencyPreserving, unpreservedDependencies: string[] }` | Whether the BCNF result is lossless, and which dependencies it failed to preserve |
 | `higherNormalForms` | `HigherNormalFormResult` | 4NF/5NF verdicts, violations, decomposition |
 | `steps` | `NormalizationStep[]` | Numbered walkthrough, 1 → 8 |
 | `warnings` | `string[]` | Non-fatal notices, e.g. a trivial dependency |
@@ -260,6 +270,52 @@ const fiveNf  = response.higherNormalForms.decomposition.filter((r) => r.name.st
 ```
 
 Prefixes in use: `R_` (2NF/3NF), `BCNF_R` (BCNF), `4NF_R`, `5NF_R`.
+
+### Walking the BCNF decomposition
+
+`bcnfSteps` records each split the analysis algorithm performed, so the
+interface can explain the result instead of just printing it:
+
+```json
+"bcnfSteps": [
+  {
+    "step": 1,
+    "sourceRelation": "R",
+    "sourceAttributes": ["Student", "Course", "Instructor"],
+    "violatingDependency": "Instructor → Course",
+    "reason": "{Instructor} is not a superkey of {Student, Course, Instructor}, so Instructor → Course breaks BCNF.",
+    "produced": [
+      { "name": "BCNF_R1", "attributes": ["Instructor", "Course"] },
+      { "name": "BCNF_R2", "attributes": ["Student", "Instructor"] }
+    ]
+  }
+]
+```
+
+A relation that was split further is named `R`, `R3`, `R4` … in the trace.
+Only the surviving relations appear in `bcnfDecomposition`, numbered
+`BCNF_R1`…`n` with no gaps. **A name never refers to two different relations.**
+
+**The decomposition is deterministic.** Dependencies are put into a canonical
+order before the algorithm runs, so the same dependency *set* always produces
+the same result regardless of the order it was written in. Without this,
+`[A→B, B→A]` and `[B→A, A→B]` decomposed differently.
+
+### When BCNF costs you a dependency
+
+`bcnfProperties.unpreservedDependencies` lists the functional dependencies the
+BCNF decomposition can no longer enforce without rejoining the relations. This
+is the trade-off against 3NF, and it is usually empty for schemas that were
+already close to normalised. A non-empty list is a finding, not an error.
+
+### Splitting on the dependency basis
+
+5NF candidates come from two sources. A single multivalued dependency yields
+the three-way split `{X ∪ Y, X ∪ (R − X − Y), Y ∪ (R − X − Y)}`. When several
+MVDs share a determinant — `A ->> B` and `A ->> C` — they jointly imply a
+*finer* split into `A ∪ B`, `A ∪ C`, `A ∪ D`, and so on for each block of the
+dependency basis. The finer split is reported when both apply, and the chase
+confirms each candidate is lossless before it is used.
 
 ### 5NF implies 4NF
 

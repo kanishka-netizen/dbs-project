@@ -43,6 +43,17 @@ export function FourNfPanel({
         emptyMessage="No multivalued dependency breaks 4NF."
       />
 
+      {/*
+       * 5NF implies 4NF, so a violation here also rules out 5NF. Stating it
+       * stops the 4NF and 5NF panels from appearing to disagree.
+       */}
+      {!satisfied && (
+        <p className="notice-warn mt-4" role="note">
+          Because every 5NF relation is also in 4NF, this violation rules out
+          5NF as well.
+        </p>
+      )}
+
       {relations.length > 0 && (
         <div className="mt-5">
           <h3 className="mb-3 text-sm font-semibold text-slate-900 dark:text-white">

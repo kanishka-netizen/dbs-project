@@ -10,13 +10,15 @@
     <title>Normalization Visualizer</title>
     <script>
       // Applied before first paint so the app does not flash the wrong theme.
+      // Mirrors the resolution order in ThemeProvider: an explicit choice wins,
+      // otherwise follow the operating system.
       (function () {
         try {
           var stored = localStorage.getItem('dbs-theme');
           var prefersDark = window.matchMedia(
             '(prefers-color-scheme: dark)',
           ).matches;
-          var dark = stored ? stored === 'dark' : prefersDark;
+          var dark = stored === 'dark' || (stored !== 'light' && prefersDark);
           document.documentElement.classList.toggle('dark', dark);
         } catch (_) {
           /* localStorage unavailable — fall back to light */

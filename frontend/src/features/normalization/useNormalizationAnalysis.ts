@@ -15,6 +15,8 @@ export type AnalysisState =
 export interface UseNormalizationAnalysis {
   state: AnalysisState;
   analyze: (request: AnalyzeNormalizationRequest) => Promise<void>;
+  /** Re-submits the last request — the network can fail for reasons that are not the schema's fault. */
+  retry: () => Promise<void>;
   reset: () => void;
 }
 
@@ -25,11 +27,16 @@ export function useNormalizationAnalysis(): UseNormalizationAnalysis {
   // render the result of a stale submission.
   const abortRef = useRef<AbortController | null>(null);
 
+  // Remembered so a failed request can be retried without retyping the schema.
+  const lastRequestRef = useRef<AnalyzeNormalizationRequest | null>(null);
+
   const analyze = useCallback(async (request: AnalyzeNormalizationRequest) => {
     abortRef.current?.abort();
 
     const controller = new AbortController();
     abortRef.current = controller;
+
+    lastRequestRef.current = request;
 
     setState({ status: 'loading' });
 
@@ -56,11 +63,22 @@ export function useNormalizationAnalysis(): UseNormalizationAnalysis {
     }
   }, []);
 
+  const retry = useCallback(async () => {
+    const lastRequest = lastRequestRef.current;
+
+    if (!lastRequest) {
+      return;
+    }
+
+    await analyze(lastRequest);
+  }, [analyze]);
+
   const reset = useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
+    lastRequestRef.current = null;
     setState({ status: 'idle' });
   }, []);
 
-  return { state, analyze, reset };
+  return { state, analyze, retry, reset };
 }

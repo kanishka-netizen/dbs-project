@@ -150,4 +150,49 @@ describe('HigherNormalFormEngine', () => {
       expect(result.normalForms['5NF']).toBe(true);
     });
   });
+
+  describe('several MVDs sharing a determinant', () => {
+    it('finds the finer split the dependency basis implies', () => {
+      const result = HigherNormalFormEngine.analyze(
+        ['A', 'B', 'C', 'D'],
+        [],
+        [
+          { left: ['A'], right: ['B'] },
+          { left: ['A'], right: ['C'] },
+        ],
+      );
+
+      expect(result.normalForms['5NF']).toBe(false);
+
+      const fiveNf = result.decomposition.filter((relation) =>
+        relation.name.startsWith('5NF_'),
+      );
+
+      expect(fiveNf.map((relation) => relation.attributes)).toEqual([
+        ['A', 'B'],
+        ['A', 'C'],
+        ['A', 'D'],
+      ]);
+    });
+
+    it('does not invent a split when only two blocks exist', () => {
+      const result = HigherNormalFormEngine.analyze(
+        ['Supplier', 'Part', 'Project'],
+        [],
+        [{ left: ['Supplier'], right: ['Part'] }],
+      );
+
+      const fiveNf = result.decomposition.filter((relation) =>
+        relation.name.startsWith('5NF_'),
+      );
+
+      // Two blocks is the binary case 4NF already covers, so the three-way
+      // split comes from the single-MVD derivation, not the basis.
+      expect(fiveNf.map((relation) => relation.attributes)).toEqual([
+        ['Supplier', 'Part'],
+        ['Supplier', 'Project'],
+        ['Part', 'Project'],
+      ]);
+    });
+  });
 });

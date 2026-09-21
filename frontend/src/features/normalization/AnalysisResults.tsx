@@ -41,6 +41,25 @@ export function AnalysisResults({
 
   return (
     <div className="space-y-8">
+      {/*
+       * The result replaces the whole panel when it arrives, which a screen
+       * reader would otherwise not notice. One short sentence is enough — a
+       * live region wrapped around the entire report would be unusable.
+       */}
+      <p className="sr-only" role="status" aria-live="polite">
+        Analysis complete. The relation {response.relation} is in{' '}
+        {response.highestNormalForm}.
+      </p>
+
+      <div className="print-only">
+        <h1 className="text-xl font-bold">
+          Normalization analysis — {response.relation}
+        </h1>
+        <p className="mt-1 text-sm">
+          Highest normal form: {response.highestNormalForm}
+        </p>
+      </div>
+
       <section aria-labelledby="verdicts-heading">
         <h2 id="verdicts-heading" className="section-title mb-4">
           Normal form coverage
@@ -109,11 +128,18 @@ export function AnalysisResults({
         </section>
       )}
 
-      <BcnfDecompositionView relations={response.bcnfDecomposition} />
+      <BcnfDecompositionView
+        relations={response.bcnfDecomposition}
+        steps={response.bcnfSteps}
+        properties={response.bcnfProperties}
+      />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <FourNfPanel higherNormalForms={response.higherNormalForms} />
-        <FiveNfPanel higherNormalForms={response.higherNormalForms} />
+        <FiveNfPanel
+          higherNormalForms={response.higherNormalForms}
+          allAttributes={response.attributes}
+        />
       </div>
 
       <section aria-labelledby="steps-heading">
