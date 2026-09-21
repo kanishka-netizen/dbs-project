@@ -33,4 +33,10 @@ export const NAV_ITEMS: NavItem[] = [
     description: 'How to write a schema, and what the results mean',
     owner: 'team2',
   },
+  {
+    to: '/developed-by',
+    label: 'Developed By',
+    description: 'Meet the team behind the Database Normalization Assistant',
+    owner: 'team2',
+  },
 ];
