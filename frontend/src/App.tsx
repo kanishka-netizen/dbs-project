@@ -6,6 +6,7 @@ import { HelpPage } from './pages/HelpPage';
 import { HomePage } from './pages/HomePage';
 import { LearnPage } from './pages/LearnPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { QuizPage } from './pages/QuizPage';
 import { VisualizerPage } from './pages/VisualizerPage';
 
 const router = createBrowserRouter([
@@ -16,6 +17,7 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: 'visualizer', element: <VisualizerPage /> },
       { path: 'learn', element: <LearnPage /> },
+      { path: 'quiz', element: <QuizPage /> },
       { path: 'assistant', element: <AssistantPage /> },
       { path: 'help', element: <HelpPage /> },
       { path: '*', element: <NotFoundPage /> },

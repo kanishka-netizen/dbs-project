@@ -22,6 +22,12 @@ export const NAV_ITEMS: NavItem[] = [
     owner: 'team1',
   },
   {
+    to: '/quiz',
+    label: 'Quiz',
+    description: 'Practice GATE previous year questions on normalization',
+    owner: 'team1',
+  },
+  {
     to: '/assistant',
     label: 'Assistant',
     description: 'Normalise a schema automatically and export a report',
