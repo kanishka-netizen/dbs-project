@@ -1,5 +1,4 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-
 import { AppShell } from './components/layout/AppShell';
 import { AssistantPage } from './pages/AssistantPage';
 import { HelpPage } from './pages/HelpPage';
@@ -8,6 +7,7 @@ import { LearnPage } from './pages/LearnPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { QuizPage } from './pages/QuizPage';
 import { VisualizerPage } from './pages/VisualizerPage';
+import { DevelopedByPage } from './pages/DevelopedByPage';
 
 const router = createBrowserRouter([
   {
@@ -20,6 +20,7 @@ const router = createBrowserRouter([
       { path: 'quiz', element: <QuizPage /> },
       { path: 'assistant', element: <AssistantPage /> },
       { path: 'help', element: <HelpPage /> },
+      { path: 'developed-by', element: <DevelopedByPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

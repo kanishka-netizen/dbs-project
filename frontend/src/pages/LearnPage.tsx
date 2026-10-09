@@ -22,6 +22,23 @@ export function LearnPage() {
               </a>
             </li>
           ))}
+          <li>
+  <a
+    href="#video"
+    className="btn-secondary px-3 py-1.5 text-xs"
+  >
+    Video
+  </a>
+</li>
+
+<li>
+  <a
+    href="#references"
+    className="btn-secondary px-3 py-1.5 text-xs"
+  >
+    References
+  </a>
+</li>
         </ul>
       </nav>
 
@@ -113,6 +130,131 @@ export function LearnPage() {
           </article>
         ))}
       </div>
+
+      {/* Normalization Video */}
+      <section
+        id="video"
+        className="card-padded mt-6 scroll-mt-20"
+      >
+        <header className="mb-5">
+          <span className="badge-info mb-2">Video</span>
+
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+            Database Normalization Explained
+          </h2>
+
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            Watch this visual explanation of database normalization covering
+            1NF, 2NF, 3NF, BCNF, 4NF and 5NF.
+          </p>
+        </header>
+
+        <div className="relative aspect-video overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
+          <iframe
+            className="absolute inset-0 h-full w-full"
+            src="https://www.youtube.com/embed/GFQaEYEc8_8"
+            title="Learn Database Normalization - 1NF, 2NF, 3NF, 4NF, 5NF"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+          />
+        </div>
+
+        <p className="mt-3 text-xs text-slate-500 dark:text-slate-500">
+          Video: Decomplexify — Learn Database Normalization.
+        </p>
+      </section>
+
+      {/* References */}
+      <section
+        id="references"
+        className="card-padded mt-6 scroll-mt-20"
+      >
+        <header className="mb-5">
+          <span className="badge-info mb-2">References</span>
+
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+            References and Learning Resources
+          </h2>
+
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            Textbooks and resources referred to while developing the
+            normalization concepts and explanations.
+          </p>
+        </header>
+
+        <div className="space-y-5 text-sm text-slate-600 dark:text-slate-400">
+          <div>
+            <h3 className="font-semibold text-slate-900 dark:text-white">
+              Text Book
+            </h3>
+
+            <ol className="mt-2 list-decimal space-y-2 pl-5">
+              <li>
+                R. Elmasri and S. B. Navathe,{' '}
+                <span className="italic">
+                  Fundamentals of Database Systems
+                </span>
+                , Pearson India Education, 7th Edition, 2021.
+              </li>
+            </ol>
+          </div>
+
+          <div>
+            <h3 className="font-semibold text-slate-900 dark:text-white">
+              Reference Books
+            </h3>
+
+            <ol className="mt-2 list-decimal space-y-2 pl-5">
+              <li>
+                A. Silberschatz, H. F. Korth and S. Sudarshan,{' '}
+                <span className="italic">
+                  Database System Concepts
+                </span>
+                , McGraw Hill India, 7th Edition, 2021.
+              </li>
+
+              <li>
+                Mark L. Gillenson and Pradeep Singh,{' '}
+                <span className="italic">
+                  Fundamentals of Database Management Systems – An Indian
+                  Adaptation
+                </span>
+                , Wiley, India, 3rd Edition, 2025.
+              </li>
+
+              <li>
+                M. Tamer Özsu and Patrick Valduriez,{' '}
+                <span className="italic">
+                  Principles of Distributed Database Systems
+                </span>
+                , Springer Nature, 4th Edition, 2020.
+              </li>
+
+              <li>
+                Gerardus Blokdyk,{' '}
+                <span className="italic">
+                  NoSQL Databases A Complete Guide
+                </span>
+                , 5STARCooks, 1st Edition, 2021.
+              </li>
+            </ol>
+          </div>
+
+          <div>
+            <h3 className="font-semibold text-slate-900 dark:text-white">
+              Additional Reference
+            </h3>
+
+            <ol className="mt-2 list-decimal space-y-2 pl-5">
+              <li>
+                OpenAI, <span className="italic">ChatGPT</span>, used as an
+                AI-assisted reference and development aid for explanations,
+                implementation guidance and documentation.
+              </li>
+            </ol>
+          </div>
+        </div>
+      </section>
     </PageContainer>
   );
 }
