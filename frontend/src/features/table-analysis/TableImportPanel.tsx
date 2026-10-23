@@ -7,6 +7,45 @@ interface TableImportPanelProps {
   onTableImported: (table: TableInstance) => void;
 }
 
+const SAMPLE_FILES = [
+  {
+    name: '1NF: Student Profile',
+    badge: '1NF',
+    sqlFile: '/samples/1nf_student_profile.sql',
+    csvFile: '/samples/1nf_student_profile.csv',
+  },
+  {
+    name: '2NF: Student Course',
+    badge: '2NF',
+    sqlFile: '/samples/2nf_student_course.sql',
+    csvFile: '/samples/2nf_student_course.csv',
+  },
+  {
+    name: '3NF: Employee Dept',
+    badge: '3NF',
+    sqlFile: '/samples/3nf_employee_dept.sql',
+    csvFile: '/samples/3nf_employee_dept.csv',
+  },
+  {
+    name: 'BCNF: Student Advisor',
+    badge: 'BCNF',
+    sqlFile: '/samples/bcnf_student_advisor.sql',
+    csvFile: '/samples/bcnf_student_advisor.csv',
+  },
+  {
+    name: '4NF: Faculty Course Book',
+    badge: '4NF',
+    sqlFile: '/samples/4nf_faculty_course_book.sql',
+    csvFile: '/samples/4nf_faculty_course_book.csv',
+  },
+  {
+    name: '5NF: Supply Chain',
+    badge: '5NF',
+    sqlFile: '/samples/5nf_project_supply_chain.sql',
+    csvFile: '/samples/5nf_project_supply_chain.csv',
+  },
+];
+
 export function TableImportPanel({ onTableImported }: TableImportPanelProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -31,6 +70,20 @@ export function TableImportPanel({ onTableImported }: TableImportPanelProps) {
     } catch (err) {
       setError(`Failed to read file: ${(err as Error).message}`);
     } finally {
+      setLoading(false);
+    }
+  }
+
+  async function loadSampleDirectly(url: string, fileName: string) {
+    setError(null);
+    setLoading(true);
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const file = new File([blob], fileName);
+      await processFile(file);
+    } catch (err) {
+      setError(`Failed to load sample: ${(err as Error).message}`);
       setLoading(false);
     }
   }
@@ -62,13 +115,15 @@ export function TableImportPanel({ onTableImported }: TableImportPanelProps) {
   }
 
   return (
-    <div className="card-padded">
-      <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">
-        Import Table from Your Device
-      </h3>
-      <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-        Upload a file containing table data. Supported formats: <strong>.csv</strong> (comma-separated values), <strong>.sql</strong> (SQL*Plus DDL & DML script), or <strong>.json</strong> (array of row objects).
-      </p>
+    <div className="card-padded space-y-6">
+      <div>
+        <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-1">
+          Import Table from Your Device
+        </h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          Upload a file containing table data. Supported formats: <strong>.csv</strong> (comma-separated values), <strong>.sql</strong> (SQL*Plus DDL & DML script), or <strong>.json</strong> (array of row objects).
+        </p>
+      </div>
 
       <div
         onDrop={handleDrop}
@@ -111,11 +166,67 @@ export function TableImportPanel({ onTableImported }: TableImportPanelProps) {
       </div>
 
       {error && (
-        <div className="mt-4 rounded-lg bg-red-50 p-3 text-xs text-red-700 dark:bg-red-950/30 dark:text-red-300">
+        <div className="rounded-lg bg-red-50 p-3 text-xs text-red-700 dark:bg-red-950/30 dark:text-red-300">
           <strong>Import Error:</strong>
           <pre className="mt-1 whitespace-pre-wrap">{error}</pre>
         </div>
       )}
+
+      {/* Download Sample Files Section */}
+      <div className="border-t border-slate-200 dark:border-slate-800 pt-4">
+        <div className="mb-3">
+          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+            Download Sample Files to Test Uploading:
+          </h4>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            Click <strong>Download (.sql / .csv)</strong> to save to your computer, or click <strong>Load Directly</strong>:
+          </p>
+        </div>
+
+        <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+          {SAMPLE_FILES.map((sample) => (
+            <div
+              key={sample.name}
+              className="rounded-lg border border-slate-200 p-2.5 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40"
+            >
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate" title={sample.name}>
+                  {sample.name}
+                </span>
+                <span className="chip-brand text-[9px] font-bold shrink-0">
+                  {sample.badge}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
+                <a
+                  href={sample.sqlFile}
+                  download
+                  className="rounded bg-white px-2 py-1 font-mono font-medium text-slate-700 shadow-xs border border-slate-200 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700"
+                >
+                  📥 .SQL
+                </a>
+                <a
+                  href={sample.csvFile}
+                  download
+                  className="rounded bg-white px-2 py-1 font-mono font-medium text-slate-700 shadow-xs border border-slate-200 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700"
+                >
+                  📥 .CSV
+                </a>
+                <button
+                  type="button"
+                  onClick={() =>
+                    loadSampleDirectly(sample.sqlFile, sample.sqlFile.split('/').pop() || 'sample.sql')
+                  }
+                  className="ml-auto text-purple-600 dark:text-purple-400 hover:underline font-semibold"
+                >
+                  Load Directly ➜
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

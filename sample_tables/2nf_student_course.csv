@@ -1,0 +1,6 @@
+RollNo,StudentName,Department,CourseID,CourseName,Grade
+101,Aarav Sharma,CSE,CS101,Data Structures,A
+101,Aarav Sharma,CSE,CS102,Algorithms,A+
+102,Riya Patel,ECE,CS101,Data Structures,B+
+102,Riya Patel,ECE,EC201,Digital Circuits,A
+103,Kabir Mehta,CSE,CS102,Algorithms,B
