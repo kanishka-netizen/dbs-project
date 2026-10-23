@@ -8,6 +8,7 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import { QuizPage } from './pages/QuizPage';
 import { VisualizerPage } from './pages/VisualizerPage';
 import { DevelopedByPage } from './pages/DevelopedByPage';
+import { TableStudioPage } from './pages/TableStudioPage';
 
 const router = createBrowserRouter([
   {
@@ -15,6 +16,7 @@ const router = createBrowserRouter([
     element: <AppShell />,
     children: [
       { index: true, element: <HomePage /> },
+      { path: 'table-studio', element: <TableStudioPage /> },
       { path: 'visualizer', element: <VisualizerPage /> },
       { path: 'learn', element: <LearnPage /> },
       { path: 'quiz', element: <QuizPage /> },

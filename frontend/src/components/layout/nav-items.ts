@@ -10,6 +10,12 @@ export interface NavItem {
 /** Site navigation — owned by Team 2 (TripleX). */
 export const NAV_ITEMS: NavItem[] = [
   {
+    to: '/table-studio',
+    label: 'Table Studio',
+    description: 'Import tables, execute SQL*Plus scripts, and analyze real data',
+    owner: 'team3',
+  },
+  {
     to: '/visualizer',
     label: 'Visualizer',
     description: 'Analyse a schema and step through its decomposition',

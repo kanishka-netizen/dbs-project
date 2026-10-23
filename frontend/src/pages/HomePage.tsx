@@ -12,21 +12,22 @@ export function HomePage() {
           Database Systems Project
         </p>
         <h1 className="max-w-3xl text-3xl font-bold tracking-tight text-slate-900 sm:text-5xl dark:text-white">
-          See exactly which normal form your schema is in — and why.
+          See exactly which normal form your schema & tables are in — and why.
         </h1>
         <p className="mt-4 max-w-2xl text-lg text-slate-600 dark:text-slate-400">
-          Enter a relation, its attributes and its functional dependencies. The
-          analyser reports every normal form from 1NF to 5NF, names the
-          dependency that breaks the weakest one, and shows the decomposition
-          step by step.
+          Analyze real database tables from SQL*Plus scripts or CSV device files, or enter schema dependencies. The
+          analyser reports every normal form from 1NF to 5NF, mines candidate keys, highlights data conflicts, and projects the decomposed relations with real data.
         </p>
 
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link to="/visualizer" className="btn-primary">
-            Open the visualizer
+          <Link to="/table-studio" className="btn-primary">
+            🚀 Open Table Studio (SQL*Plus & Real Data)
+          </Link>
+          <Link to="/visualizer" className="btn-secondary">
+            Schema Visualizer
           </Link>
           <Link to="/learn" className="btn-secondary">
-            Learn the normal forms
+            Learn Normal Forms
           </Link>
           <Link to="/quiz" className="btn-secondary">
             Take GATE Quiz
@@ -49,9 +50,9 @@ export function HomePage() {
 
       <section aria-labelledby="explore-heading" className="mt-12">
         <h2 id="explore-heading" className="section-title">
-          Explore
+          Explore Features
         </h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.to}
