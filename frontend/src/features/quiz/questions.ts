@@ -1,7 +1,10 @@
+export type Difficulty = 'Easy' | 'Medium' | 'Hard';
+
 export interface QuizQuestion {
   id: string;
   year: string;
   topic?: string;
+  difficulty: Difficulty;
   text: string;
   options: string[];
   correctAnswerIndex: number;
@@ -239,4 +242,12 @@ export const GATE_QUESTIONS: QuizQuestion[] = [
     correctAnswerIndex: 2,
     explanation: "B+ tree leaf nodes hold the data entries or record pointers and are typically linked for efficient range scans."
   }
-];
+].map((question) => ({
+  ...question,
+  difficulty:
+    Number(question.id.replace('q', '')) <= 7
+      ? 'Easy' as const
+      : Number(question.id.replace('q', '')) <= 15
+        ? 'Medium' as const
+        : 'Hard' as const,
+}));

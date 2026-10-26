@@ -29,9 +29,13 @@ export function HomePage() {
           <Link to="/learn" className="btn-secondary">
             Learn Normal Forms
           </Link>
-          <Link to="/quiz" className="btn-secondary">
-            Take GATE Quiz
-          </Link>
+          <Link to="/quiz" className="btn-primary">
+  QUIZ
+</Link>
+
+<Link to="/competitive-exam" className="btn-secondary">
+  COMPETITIVE EXAM
+</Link>
         </div>
       </section>
 

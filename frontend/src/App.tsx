@@ -9,6 +9,7 @@ import { QuizPage } from './pages/QuizPage';
 import { VisualizerPage } from './pages/VisualizerPage';
 import { DevelopedByPage } from './pages/DevelopedByPage';
 import { TableStudioPage } from './pages/TableStudioPage';
+import { CompetitiveExamPage } from './pages/CompetitiveExamPage';
 
 const router = createBrowserRouter([
   {
@@ -24,6 +25,7 @@ const router = createBrowserRouter([
       { path: 'help', element: <HelpPage /> },
       { path: 'developed-by', element: <DevelopedByPage /> },
       { path: '*', element: <NotFoundPage /> },
+      { path: 'competitive-exam', element: <CompetitiveExamPage /> },
     ],
   },
 ]);

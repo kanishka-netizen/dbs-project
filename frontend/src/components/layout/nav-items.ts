@@ -27,12 +27,18 @@ export const NAV_ITEMS: NavItem[] = [
     description: 'Normal forms explained, with worked examples',
     owner: 'team1',
   },
-  {
-    to: '/quiz',
-    label: 'Quiz',
-    description: 'Practice GATE previous year questions on normalization',
-    owner: 'team1',
-  },
+{
+  to: '/quiz',
+  label: 'QUIZ',
+  description: 'Take an interactive DBMS quiz with AI-generated questions',
+  owner: 'team1',
+},
+{
+  to: '/competitive-exam',
+  label: 'COMPETITIVE EXAM',
+  description: 'Practice solved DBMS questions for GATE, UPSC, and PSU exams',
+  owner: 'team1',
+},
   {
     to: '/assistant',
     label: 'Assistant',

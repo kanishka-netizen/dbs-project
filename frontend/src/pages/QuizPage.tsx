@@ -1,146 +1,262 @@
-import { useState } from 'react';
+
+import { useMemo, useState } from 'react';
 import { PageContainer, PageHeader } from '../components/layout/PageContainer';
 import { GATE_QUESTIONS, type QuizQuestion } from '../features/quiz/questions';
 
+type Difficulty = 'Easy' | 'Medium' | 'Hard';
+
+
 export function QuizPage() {
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({});
-  const [showResults, setShowResults] = useState(false);
+  const [started, setStarted] = useState(false);
+  const [difficulty, setDifficulty] = useState<Difficulty>('Easy');
+  const [questionCount, setQuestionCount] = useState(10);
+  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [finished, setFinished] = useState(false);
 
-  const handleOptionSelect = (questionId: string, optionIndex: number) => {
-    if (showResults) return; // Prevent changing after submission
-    setSelectedAnswers((prev) => ({
-      ...prev,
-      [questionId]: optionIndex,
+const availableQuestions = useMemo(() => {
+  const matching = GATE_QUESTIONS.filter(
+    (question) => question.difficulty === difficulty,
+  );
+
+  return [...matching].sort(() => Math.random() - 0.5);
+}, [difficulty]); 
+
+  const currentQuestion = questions[currentIndex];
+
+  const score = questions.reduce(
+    (total, question) =>
+      total + (answers[question.id] === question.correctAnswerIndex ? 1 : 0),
+    0,
+  );
+
+  function startQuiz() {
+  const selected = availableQuestions.slice(0, questionCount);
+
+  if (selected.length === 0) return;
+
+  setQuestions(selected);
+  setAnswers({});
+  setCurrentIndex(0);
+  setSelectedAnswer(null);
+  setFinished(false);
+  setStarted(true);
+}
+  function submitAnswer() {
+    if (selectedAnswer === null || !currentQuestion) return;
+
+    setAnswers((previous) => ({
+      ...previous,
+      [currentQuestion.id]: selectedAnswer,
     }));
-  };
+  }
 
-  const calculateScore = () => {
-    return GATE_QUESTIONS.reduce((score, q) => {
-      return score + (selectedAnswers[q.id] === q.correctAnswerIndex ? 1 : 0);
-    }, 0);
-  };
+  function nextQuestion() {
+    if (currentIndex === questions.length - 1) {
+      setFinished(true);
+      return;
+    }
 
-  const handleReset = () => {
-    setSelectedAnswers({});
-    setShowResults(false);
-  };
+    setCurrentIndex((index) => index + 1);
+    setSelectedAnswer(null);
+  }
+
+  function restart() {
+    setStarted(false);
+    setFinished(false);
+    setQuestions([]);
+    setAnswers({});
+    setCurrentIndex(0);
+    setSelectedAnswer(null);
+  }
+
+  const alreadyAnswered =
+    currentQuestion !== undefined &&
+    answers[currentQuestion.id] !== undefined;
+
+  const percentage = questions.length
+    ? Math.round((score / questions.length) * 100)
+    : 0;
 
   return (
     <PageContainer>
       <PageHeader
-        title="GATE Previous Year Questions"
-        subtitle="Test your knowledge on Functional Dependencies and Normalization with authentic GATE questions."
-        ownedBy="Team 1 — TLE"
+        title="DBMS QUIZ"
+        subtitle="Test your database management knowledge, one question at a time."
+        ownedBy="Team 1"
       />
 
-      <div className="space-y-8">
-        {GATE_QUESTIONS.map((q: QuizQuestion, index: number) => {
-          const selectedOption = selectedAnswers[q.id];
-          const isCorrect = selectedOption === q.correctAnswerIndex;
+      {!started ? (
+        <section className="card-padded mx-auto max-w-2xl space-y-6">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+            Configure your quiz
+          </h2>
 
-          return (
-            <div
-              key={q.id}
-              className="card-padded relative flex flex-col space-y-4"
-            >
-              <div className="flex items-center justify-between">
-                <span className="badge-info text-xs">{q.year}</span>
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                  Question {index + 1} of {GATE_QUESTIONS.length}
-                </span>
-              </div>
-
-              <p className="text-base font-medium text-slate-900 dark:text-white">
-                {q.text}
-              </p>
-
-              <div className="grid gap-2">
-                {q.options.map((opt, optIndex) => {
-                  let buttonStyle =
-                    'border border-slate-200 dark:border-slate-800 bg-transparent text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900';
-
-                  if (selectedOption === optIndex) {
-                    buttonStyle =
-                      'border-brand-500 bg-brand-500/10 text-brand-700 dark:text-brand-300 font-semibold';
-                  }
-
-                  if (showResults) {
-                    if (optIndex === q.correctAnswerIndex) {
-                      buttonStyle =
-                        'border-ok-500 bg-ok-500/20 text-ok-700 dark:text-ok-300 font-semibold';
-                    } else if (selectedOption === optIndex && !isCorrect) {
-                      buttonStyle =
-                        'border-danger-500 bg-danger-500/20 text-danger-700 dark:text-danger-300 font-semibold';
-                    }
-                  }
-
-                  return (
-                    <button
-                      key={optIndex}
-                      type="button"
-                      disabled={showResults}
-                      onClick={() => handleOptionSelect(q.id, optIndex)}
-                      className={`flex w-full items-center gap-3 rounded-lg p-3 text-left text-sm transition-colors ${buttonStyle}`}
-                    >
-                      <span className="flex size-6 shrink-0 items-center justify-center rounded-full border border-current text-xs font-bold">
-                        {String.fromCharCode(65 + optIndex)}
-                      </span>
-                      <span>{opt}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {showResults && (
-                <div
-                  className={`mt-4 rounded-lg p-4 text-sm ${
-                    isCorrect
-                      ? 'border border-ok-500/40 bg-ok-500/5 text-ok-800 dark:text-ok-200'
-                      : 'border border-danger-500/40 bg-danger-500/5 text-danger-800 dark:text-danger-200'
-                  }`}
-                >
-                  <p className="font-semibold">
-                    {isCorrect ? '✓ Correct!' : '✗ Incorrect!'}
-                  </p>
-                  <p className="mt-1 text-xs">{q.explanation}</p>
-                </div>
-              )}
-            </div>
-          );
-        })}
-
-        {/* Footer actions / submission */}
-        <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-200 py-6 sm:flex-row dark:border-slate-800">
           <div>
-            {showResults && (
-              <p className="text-lg font-bold text-slate-900 dark:text-white">
-                Your Score: {calculateScore()} / {GATE_QUESTIONS.length}
-              </p>
-            )}
+            <label
+              htmlFor="question-count"
+              className="mb-2 block text-sm font-medium"
+            >
+              Number of questions
+            </label>
+            <select
+              id="question-count"
+              value={questionCount}
+              onChange={(event) => setQuestionCount(Number(event.target.value))}
+              className="w-full rounded-lg border border-slate-300 bg-transparent p-3 dark:border-slate-700"
+            >
+              {[5, 10, 15, 20, 25, 30, 40].map((count) => (
+                <option key={count} value={count}>
+                  {count} questions
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-slate-500">
+            {availableQuestions.length} questions are available at the selected difficulty.
+The quiz will use up to your selected number of questions.
+</p>
           </div>
 
-          <div className="flex gap-3">
-            {!showResults ? (
+          <fieldset>
+            <legend className="mb-3 text-sm font-medium">Difficulty</legend>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {(['Easy', 'Medium', 'Hard'] as const).map((level) => (
+                <button
+                  key={level}
+                  type="button"
+                  onClick={() => setDifficulty(level)}
+                  aria-pressed={difficulty === level}
+                  className={`rounded-lg border p-4 font-semibold transition-colors ${
+                    difficulty === level
+                      ? 'border-brand-500 bg-brand-500/10 text-brand-700 dark:text-brand-300'
+                      : 'border-slate-200 hover:border-brand-400 dark:border-slate-700'
+                  }`}
+                >
+                  {level}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+
+          <button
+            type="button"
+            className="btn-primary w-full"
+            onClick={startQuiz}
+            disabled={GATE_QUESTIONS.length === 0}
+          >
+            Start Quiz
+          </button>
+        </section>
+      ) : finished ? (
+        <section className="card-padded mx-auto max-w-2xl space-y-5 text-center">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+            Quiz complete!
+          </h2>
+          <p className="text-5xl font-bold text-brand-600 dark:text-brand-400">
+            {score}/{questions.length}
+          </p>
+          <p className="text-lg">{percentage}% correct</p>
+          <p className="text-slate-600 dark:text-slate-400">
+            {percentage >= 80
+              ? 'Excellent work! You have a strong grasp of these topics.'
+              : percentage >= 50
+                ? 'Good effort! Review the explanations to strengthen your understanding.'
+                : 'Keep practising! Review the solutions and try again.'}
+          </p>
+          <button type="button" className="btn-primary" onClick={restart}>
+            Try Again
+          </button>
+        </section>
+      ) : currentQuestion ? (
+        <section className="card-padded mx-auto max-w-3xl space-y-6">
+          <div className="flex items-center justify-between gap-3">
+            <span className="badge-info text-xs">{difficulty}</span>
+            <span className="text-sm text-slate-500">
+              Question {currentIndex + 1} of {questions.length}
+            </span>
+          </div>
+
+          <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+            <div
+              className="h-full rounded-full bg-brand-500 transition-all"
+              style={{
+                width: `${((currentIndex + 1) / questions.length) * 100}%`,
+              }}
+            />
+          </div>
+
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+            {currentQuestion.text}
+          </h2>
+
+          <div className="grid gap-3">
+            {currentQuestion.options.map((option, index) => (
+              <button
+                key={`${currentQuestion.id}-${index}`}
+                type="button"
+                disabled={alreadyAnswered}
+                onClick={() => setSelectedAnswer(index)}
+                className={`flex items-start gap-3 rounded-lg border p-4 text-left transition-colors ${
+                  selectedAnswer === index
+                    ? 'border-brand-500 bg-brand-500/10'
+                    : 'border-slate-200 hover:border-brand-400 dark:border-slate-700'
+                }`}
+              >
+                <span className="font-bold">
+                  {String.fromCharCode(65 + index)}.
+                </span>
+                <span>{option}</span>
+              </button>
+            ))}
+          </div>
+
+          {alreadyAnswered && (
+            <div
+              className={`rounded-lg border p-4 ${
+                answers[currentQuestion.id] === currentQuestion.correctAnswerIndex
+                  ? 'border-green-500/40 bg-green-500/5'
+                  : 'border-red-500/40 bg-red-500/5'
+              }`}
+            >
+              <p className="font-semibold">
+                {answers[currentQuestion.id] === currentQuestion.correctAnswerIndex
+                  ? 'Yes, you have correctly answered the question.'
+                  : 'Yet to answer correctly.'}
+              </p>
+              <p className="mt-2 text-sm">
+                <strong>Correct answer:</strong>{' '}
+                {currentQuestion.options[currentQuestion.correctAnswerIndex]}
+              </p>
+              <p className="mt-2 text-sm">{currentQuestion.explanation}</p>
+            </div>
+          )}
+
+          <div className="flex justify-end">
+            {!alreadyAnswered ? (
               <button
                 type="button"
                 className="btn-primary"
-                disabled={Object.keys(selectedAnswers).length === 0}
-                onClick={() => setShowResults(true)}
+                disabled={selectedAnswer === null}
+                onClick={submitAnswer}
               >
-                Submit Answers
+                Submit Answer
               </button>
             ) : (
               <button
                 type="button"
-                className="btn-secondary"
-                onClick={handleReset}
+                className="btn-primary"
+                onClick={nextQuestion}
               >
-                Try Again
+                {currentIndex === questions.length - 1
+                  ? 'View Results'
+                  : 'Next Question'}
               </button>
             )}
           </div>
-        </div>
-      </div>
+        </section>
+      ) : null}
     </PageContainer>
   );
 }
